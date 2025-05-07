@@ -24,17 +24,32 @@ async function fetchData(url){
 }
 
 async function getDashboardData(query){
-    const city = await fetchData(`https://freetestapi.com/api/v1/destinations?search=${query}`)
-    return city
+    
+    const responseCities = await fetchData(`http://localhost:5001/destinations?search=${query}`)
+    const responseWeather = await fetchData(`http://localhost:5001/weathers?search=${query}`)
+    const responseAirport = await fetchData(`http://localhost:5001/airports?search=${query}`)
+
+    const promises = [responseCities, responseWeather, responseAirport]
+    const [cities, weather, airport] = await Promise.all(promises)
+
+    return {
+        name: cities[0].name,
+        country: cities[0].country,
+        temperature: weather[0].temperature,
+        weather: weather[0].weather_description,
+        airport: airport[0].name
+    }
 }
 
 (async() => {
     try{
-        const result = await getDashboardData('paris')
+        const result = await getDashboardData('london')
         console.log('Risultato', result)
     }catch(error){
         console.error(error)
     }finally{
         console.log('Codice eseguito correttamente')
     }
-})
+})()
+
+getDashboardData('london')
